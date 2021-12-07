@@ -1,7 +1,7 @@
+from .database import Base
 from sqlalchemy import Column, Integer, String, DateTime
-from database import Base
 
-class TbTest(Base):
+class User(Base):
   __tablename__ = 'user'
   email = Column(String(250), primary_key=True)
   password = Column(String(250))
@@ -16,7 +16,6 @@ class TbTest(Base):
     
   def __repr__(self):
     return "<TbTest('%d', '%s', '%s'>" %(self.id, str(self.datetime), self.string)
-
 class Notice(Base):
   __tablename__ = 'xanglenotice'
   id = Column(String(250), primary_key=True)
@@ -32,4 +31,32 @@ class Notice(Base):
     self.title = title
     self.link = link
     self.regist_date = regist_date
+    self.create_date = create_date
+class Assets(Base):
+  __tablename__ = 'klayswapassets'
+  id = Column(String(250), primary_key=True)
+  currency =Column(String(250))
+  name_kor = Column(String(250))
+  price =Column(String(250))
+  update_date = Column(DateTime)
+  
+  def __init__(self, id, currency,name_kor, price, update_date):
+    self.id = id
+    self.currency =currency
+    self.name_kor = name_kor
+    self.price = price
+    self.update_date = update_date   
+class Candles(Base):
+  __tablename__ = 'klayswapcandles'
+  id = Column(String(250), primary_key=True)
+  currency =Column(String(250))
+  name_kor = Column(String(250))
+  price =Column(String(250))
+  create_date = Column(DateTime)
+  
+  def __init__(self, id, currency,name_kor, price, create_date):
+    self.id = id
+    self.currency =currency
+    self.name_kor = name_kor
+    self.price = price
     self.create_date = create_date

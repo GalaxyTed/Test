@@ -1,6 +1,10 @@
-import Database.dao
+import sys, os, time
+from datetime import datetime
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+
 from collections import OrderedDict
-import time
+from Database import dao
+
 
 #WebDriver
 from webdriver_manager.chrome import ChromeDriverManager
@@ -19,7 +23,7 @@ def initial_webdriver():
     #driver = webdriver.Chrome('C:/Users/Qpang/Desktop/test/chromedriver',options=options) #driver Path를 지정하여 생성
     return driver
 
-def run(driver):
+def xangle(driver):
     while True :
         if len(driver.window_handles) > 1 :
             driver.close()
@@ -47,10 +51,36 @@ def run(driver):
         # 맨 처음 탭으로 변경(0번 탭)
         driver.switch_to.window(driver.window_handles[1])
         
-        notices = Database.dao.select_notice(symbol,title,date)
+        notices = dao.select_notice(symbol,title,date)
         if notices.count() == 0:
-            Database.dao.insert_notice(symbol,title,link,date)
-            
+            dao.insert_notice(symbol,title,link,date)
         time.sleep(10)
+    return
 
-run(initial_webdriver())
+def klayswap(driver):
+    driver.get('https://klayswap.com/assets')
+    driver.implicitly_wait(20)
+    
+    while True :
+        #0초에 시작한다
+        while datetime.now().second!=0:
+            time.sleep(0.1)
+            
+        coininfo_list = driver.find_elements(By.CSS_SELECTOR , '#app > main > div > section > article.asset-page__list__content > div > div')
+        for item in coininfo_list:
+            coininfo = item.text.split('\n')
+            dao.insert_assets(coininfo[1],coininfo[0],coininfo[5].split(' ')[1])
+            dao.insert_candles(coininfo[1],coininfo[0],coininfo[5].split(' ')[1])
+        time.sleep(40)
+        driver.refresh()
+        driver.implicitly_wait(20)
+    return
+
+def test():
+    while True :
+        result_data = dao.select_candles("BORA",5,"MIN")
+        result_data
+    
+if __name__ == "__main__":
+    #test()
+    klayswap(initial_webdriver())

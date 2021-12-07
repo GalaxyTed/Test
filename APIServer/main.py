@@ -1,8 +1,11 @@
-import test
+import sys, os
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+
 from starlette.responses import JSONResponse
 from fastapi import FastAPI
 from typing import Optional
 
+from Database import dao
 
 app = FastAPI()
 
@@ -17,7 +20,7 @@ def read_test():
 @app.get("/login/")
 def read_item(email: Optional[str] = None, password: Optional[str] = None):
     try:
-        result = test.select_user(email,password)
+        result = dao.select_user(email,password)
     except:
         result = {"status": "9999"} 
     return JSONResponse(result)
@@ -25,7 +28,7 @@ def read_item(email: Optional[str] = None, password: Optional[str] = None):
 @app.get("/user/")
 def read_item(email: Optional[str] = None):
     try:
-        result = test.select_user(email)
+        result = dao.select_user(email)
     except:
         result = {"status": "9999"} 
     return JSONResponse(result)
@@ -33,7 +36,7 @@ def read_item(email: Optional[str] = None):
 @app.get("/secession/")
 def read_item(email: Optional[str] = None):
     try:
-        result = test.delete_user(email)
+        result = dao.delete_user(email)
     except:
         result = {"status": "9999"} 
     return JSONResponse(result)
@@ -42,7 +45,7 @@ def read_item(email: Optional[str] = None):
 @app.get("/join/")
 def read_item(email: Optional[str] = None, password: Optional[str] = None, name: Optional[str] = None):
     try:
-        result = test.insert_user(email,password,name)
+        result = dao.insert_user(email,password,name)
     except:
         result = {"status": "9999"}
     return JSONResponse(result)
@@ -50,7 +53,23 @@ def read_item(email: Optional[str] = None, password: Optional[str] = None, name:
 @app.get("/xangle/notice/")
 def read_item():
     try:
-        result = test.select_notice()
+        result = dao.select_notice()
+    except:
+        result = {"status": "9999"}
+    return JSONResponse(result)
+
+@app.get("/klayswap/assets/")
+def read_item(currency: Optional[str] = None):
+    try:
+        result = dao.select_assets(currency)
+    except:
+        result = {"status": "9999"}
+    return JSONResponse(result)
+
+@app.get("/klayswap/candles/")
+def read_item(currency: Optional[str] = None, count: Optional[int] = 1,interval_type: Optional[str] = None, interval: Optional[int] = 1):
+    try:
+        result = dao.select_candles(currency, count ,interval_type, interval)
     except:
         result = {"status": "9999"}
     return JSONResponse(result)
