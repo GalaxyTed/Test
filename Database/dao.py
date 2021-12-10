@@ -1,7 +1,7 @@
 from sqlalchemy.sql.expression import text
 from .database import init_db
 from .database import db_session
-from .models import Notice
+from .models import Notice, TradeHistory
 from .models import Assets
 from .models import User
 from .models import Candles
@@ -148,4 +148,16 @@ def insert_candles(currency, name, price):
   db_session.commit()
   return
 
-
+#Trade History
+def insert_tradeHistory(user_name,trigger_name, order_type, exchange_name, currency, unit, price):
+  id = uuid.uuid1()
+  now_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+  tradeHistory = TradeHistory(id,user_name,trigger_name, order_type, exchange_name, currency, unit, price,now_date)
+  db_session.add(tradeHistory)
+  db_session.commit()
+  
+  result_data = OrderedDict() 
+  result_data["status"] = "0000"
+  result_data["data"] = dict(id=tradeHistory.id, user_name=tradeHistory.user_name, trigger_name=tradeHistory.trigger_name, order_type=tradeHistory.order_type, exchange_name=tradeHistory.exchange_name, currency=tradeHistory.currency, unit=str(tradeHistory.unit), price=str(tradeHistory.price), create_date = str(tradeHistory.create_date))
+  
+  return result_data

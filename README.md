@@ -1,6 +1,6 @@
 # QProjectPython
-Collection Server 와 API Server 를 위한 Python 프로젝트 입니다. \n
-[FastAPI참고]\n
+Collection Server 와 API Server 를 위한 Python 프로젝트 입니다.
+[FastAPI참고]
 https://github.com/riseryan89/notification-api
 
 ### TO DO
@@ -49,4 +49,4 @@ https://github.com/riseryan89/notification-api
 
 ### sys 사용이유
 1. sys.dont_write_bytecode = True : ByteCode를 만들지 안도록 하여 폴더 가시성 향상 (__pycache__) 
-sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+2. sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__)))) : 절대경로를 프로젝트 폴더 기준으로 설정

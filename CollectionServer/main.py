@@ -78,9 +78,9 @@ def klayswap(driver):
 
 def test():
     while True :
-        result_data = dao.select_candles("BORA",5,"MIN")
+        result_data = dao.insert_tradeHistory("user","trigger","order","exchange","currency",1,10000)
         result_data
     
 if __name__ == "__main__":
-    #test()
-    klayswap(initial_webdriver())
+    test()
+    #klayswap(initial_webdriver())
