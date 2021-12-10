@@ -1,3 +1,4 @@
+import json
 from datetime import datetime, timedelta
 import bcrypt
 import jwt
@@ -36,22 +37,24 @@ async def register(reg_info: UserRegister, session: Session = Depends(db.session
 
 
 
-@router.post("/login", status_code=200, response_model=Token)
+@router.post("/login", status_code=200)
 async def login(user_info: UserRegister):
-    
     is_exist = await is_email_exist(user_info.email)
     if not user_info.email or not user_info.pw:
-        return JSONResponse(status_code=400, content=dict(msg="Email and PW must be provided'"))
+        return JSONResponse(status_code=400, content=dict(status=400, description="Email and PW must be provided'"))
     if not is_exist:
-        return JSONResponse(status_code=400, content=dict(msg="NO_MATCH_USER"))
+        return JSONResponse(status_code=400, content=dict(status=400, description="NO_MATCH_USER"))
     
     user = Users.get(email=user_info.email)
     is_verified = bcrypt.checkpw(user_info.pw.encode("utf-8"), user.pw.encode("utf-8"))
     if not is_verified:
-        return JSONResponse(status_code=400, content=dict(msg="NO_MATCH_USER"))
-    
-    token = dict(Authorization=f"Bearer {create_access_token(data=UserToken.from_orm(user).dict(exclude={'pw', 'marketing_agree'}),)}")
-    return token
+        return JSONResponse(status_code=400, content=dict(status=400, description="NO_MATCH_USER"))
+
+    result_data = dict()
+    result_data["status"] = "200";
+    result_data["authorization"] = f"Bearer {create_access_token(data=UserToken.from_orm(user).dict(exclude={'pw'}),)}"
+    result_data["data"] = [dict(email =user.email, name=user.name)]
+    return result_data
   
 
 
