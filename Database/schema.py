@@ -1,55 +1,41 @@
-from sqlalchemy import Column, Integer, Float, String, DateTime, Enum, Boolean, ForeignKey
 from sqlalchemy import func
-from sqlalchemy.orm import Session, relationship
+from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy.orm import Session
 
-from Database.conn import Base, db
-
+from Database.conn import Base, database
 
 class BaseSchema:
     id = Column(Integer, primary_key=True, index=True)
-    created_at = Column(DateTime, nullable=False, default=func.utc_timestamp())
-    updated_at = Column(DateTime, nullable=False, default=func.utc_timestamp(), onupdate=func.utc_timestamp())
-
+    created_at = Column(DateTime, nullable=False, default=func.current_timestamp())
+    updated_at = Column(DateTime, nullable=False, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    
     def __init__(self):
         self._q = None
         self._session = None
         self.served = None
-
+    
+    
     def all_columns(self):
         return [c for c in self.__table__.columns if c.primary_key is False and c.name != "created_at"]
 
-    def __hash__(self):
-        return hash(self.id)
-
+    
     @classmethod
-    def create(cls, session: Session, auto_commit=False, **kwargs):
-        """
-        테이블 데이터 적재 전용 함수
-        :param session:
-        :param auto_commit: 자동 커밋 여부
-        :param kwargs: 적재 할 데이터
-        :return:
-        """
+    def create(cls, session: Session = None, auto_commit=False, **kwargs):
+        sess = next(database.session()) if not session else session
         obj = cls()
         for col in obj.all_columns():
             col_name = col.name
             if col_name in kwargs:
                 setattr(obj, col_name, kwargs.get(col_name))
-        session.add(obj)
-        session.flush()
+        sess.add(obj)
+        sess.flush()
         if auto_commit:
-            session.commit()
+            sess.commit()
         return obj
 
     @classmethod
     def get(cls, session: Session = None, **kwargs):
-        """
-        Simply get a Row
-        :param session:
-        :param kwargs:
-        :return:
-        """
-        sess = next(db.session()) if not session else session
+        sess = next(database.session()) if not session else session
         query = sess.query(cls)
         for key, val in kwargs.items():
             col = getattr(cls, key)
@@ -64,12 +50,6 @@ class BaseSchema:
 
     @classmethod
     def filter(cls, session: Session = None, **kwargs):
-        """
-        Simply get a Row
-        :param session:
-        :param kwargs:
-        :return:
-        """
         cond = []
         for key, val in kwargs.items():
             key = key.split("__")
@@ -87,7 +67,7 @@ class BaseSchema:
             obj._session = session
             obj.served = True
         else:
-            obj._session = next(db.session())
+            obj._session = next(database.session())
             obj.served = False
         query = obj._session.query(cls)
         query = query.filter(*cond)
@@ -115,10 +95,8 @@ class BaseSchema:
         return self
 
     def update(self, auto_commit: bool = False, **kwargs):
-        qs = self._q.update(kwargs)
-        get_id = self.id
         ret = None
-
+        qs = self._q.update(kwargs)
         self._session.flush()
         if qs > 0 :
             ret = self._q.first()
@@ -152,61 +130,22 @@ class BaseSchema:
             self._session.close()
         else:
             self._session.flush()
-
-
+   
 class Users(Base, BaseSchema):
     __tablename__ = "users"
-    status = Column(Enum("active", "deleted", "blocked"), default="active")
     email = Column(String(length=255), nullable=True)
-    pw = Column(String(length=2000), nullable=True)
+    password = Column(String(length=2000), nullable=True)
     name = Column(String(length=255), nullable=True)
-    phone_number = Column(String(length=20), nullable=True, unique=True)
-    profile_img = Column(String(length=1000), nullable=True)
-    sns_type = Column(Enum("FB", "G", "K"), nullable=True)
-    marketing_agree = Column(Boolean, nullable=True, default=True)
-    keys = relationship("ApiKeys", back_populates="users")
-
-class ApiKeys(Base, BaseSchema):
-    __tablename__ = "api_keys"
-    access_key = Column(String(length=64), nullable=False, index=True)
-    secret_key = Column(String(length=64), nullable=False)
-    user_memo = Column(String(length=40), nullable=True)
-    status = Column(Enum("active", "stopped", "deleted"), default="active")
-    is_whitelisted = Column(Boolean, default=False)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    whitelist = relationship("ApiWhiteLists", backref="api_keys")
-    users = relationship("Users", back_populates="keys")
-
-class ApiWhiteLists(Base, BaseSchema):
-    __tablename__ = "api_whitelists"
-    ip_addr = Column(String(length=64), nullable=False)
-    api_key_id = Column(Integer, ForeignKey("api_keys.id"), nullable=False)
-
+    
+class Assets(Base, BaseSchema):
+    __tablename__ = "klayswap_assets"
+    currency = Column(String(length=255), nullable=True)
+    name_kor = Column(String(length=2000), nullable=True)
+    price = Column(String(length=255), nullable=True)
+    
 class Notice(Base, BaseSchema):
-  __tablename__ = 'xanglenotice'
-  symbol =Column(String(250))
-  title = Column(String(250))
-  link = Column(String(250))
-  regist_date = Column(DateTime)
-
-class Assets(Base,BaseSchema):
-  __tablename__ = 'klayswapassets'
-  currency =Column(String(250))
-  name_kor = Column(String(250))
-  price =Column(String(250))
-
-class Candles(Base,BaseSchema):
-  __tablename__ = 'klayswapcandles'
-  currency =Column(String(250))
-  name_kor = Column(String(250))
-  price =Column(String(250))
-
-class TradeHistory(Base,BaseSchema):
-  __tablename__ = 'tradehistory'
-  user_name=Column(String(250))
-  trigger_name=Column(String(250))
-  order_type=Column(String(250))
-  exchange_name=Column(String(250))
-  currency=Column(String(250))
-  unit=Column(Float) 
-  price=Column(Float)
+    __tablename__ = "xangle_notice"
+    currency = Column(String(length=255), nullable=True)
+    title = Column(String(length=255), nullable=True)
+    link = Column(String(length=255), nullable=True)
+    reg_date = Column(DateTime, nullable=False, default=func.utc_timestamp())

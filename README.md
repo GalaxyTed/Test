@@ -6,6 +6,7 @@ https://github.com/riseryan89/notification-api
 ### TO DO
 1. python -m venv venv : 가상환경 설정
 2. .\venv\Scripts\activate.ps1 : 가상환경 활성화 
+    $ source venv/bin/activate : Termux
     (* [Powershell] Set-ExcutionPolicy RemoteSigned : Powershell인 경우 RemoteSigned 설정을 해야 가상환경을 활성화 할 수 있다.)
 3. pip install -r requirements.txt : txt파일에 서술된 pkg 항목을 설치
     (* pip freeze : 설치 된 pkg 항목을 표기)
@@ -26,6 +27,8 @@ https://github.com/riseryan89/notification-api
 
 
 ### Error Code
+200 OK
+201 Created
 400 Bad Request
 401 Unauthorized
 403 Forbidden
@@ -34,8 +37,7 @@ https://github.com/riseryan89/notification-api
 500 Internal Error
 502 Bad Gateway 
 504 Timeout
-200 OK
-201 Created
+
 
 ### Authrization 형태
 - Authorization: <type> <credentials> (일반적으로 사용)

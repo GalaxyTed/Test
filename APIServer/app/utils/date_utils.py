@@ -1,7 +1,7 @@
 from datetime import datetime, date, timedelta
 
 
-class D:
+class Date:
     def __init__(self, *args):
         self.utc_now = datetime.utcnow()
         self.timedelta = 0

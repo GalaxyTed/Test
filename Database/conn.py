@@ -11,18 +11,10 @@ class SQLAlchemy:
         if app is not None:
             self.init_app(app=app, **kwargs)
 
-    def init_app(self, app: FastAPI, **kwargs):
-        """
-        DB 초기화 함수
-        :param app: FastAPI 인스턴스
-        :param kwargs:
-        :return:
-        """
+    def init_app(self, app: FastAPI = None, **kwargs):
         database_url = kwargs.get("DB_URL")
         pool_recycle = kwargs.setdefault("DB_POOL_RECYCLE", 900)
-        is_testing = kwargs.setdefault("TEST_MODE", False)
         echo = kwargs.setdefault("DB_ECHO", True)
-
         self._engine = create_engine(
             database_url,
             echo=echo,
@@ -43,11 +35,7 @@ class SQLAlchemy:
             self._engine.dispose()
             logging.info("DB disconnected")
 
-    def get_db(self):
-        """
-        요청마다 DB 세션 유지 함수
-        :return:
-        """
+    def get_session(self):
         if self._session is None:
             raise Exception("must be called 'init_app'")
         db_session = None
@@ -59,12 +47,12 @@ class SQLAlchemy:
 
     @property
     def session(self):
-        return self.get_db
+        return self.get_session
 
     @property
     def engine(self):
         return self._engine
 
 
-db = SQLAlchemy()
+database = SQLAlchemy()
 Base = declarative_base()
